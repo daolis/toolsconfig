@@ -24,8 +24,6 @@ var testCmd = &cobra.Command{
 		fmt.Println("Execute test command")
 
 		configuration, err := toolsconfig.NewToolConfiguration(
-			toolsconfig.WithConfigDir("."),
-			toolsconfig.WithConfigFile("unittestconfig.yaml"),
 			toolsconfig.UpdateConfig(false),
 			toolsconfig.RequiredServer("testserver.io"),
 			toolsconfig.RequiredSubscription("testSubscription01"))
@@ -58,6 +56,8 @@ func main() {
 }
 
 func init() {
+	toolsconfig.ConfigFileLocation(".", "unittestconfig.yaml")
+
 	rootCmd.AddCommand(testCmd)
 
 	commands.AddToRootCommand(rootCmd, commands.WithRunFunctions(

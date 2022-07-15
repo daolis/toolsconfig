@@ -158,10 +158,6 @@ func TestNewConfiguration(t *testing.T) {
 					}
 				}
 				saveConfiguration = defaultSaveConfiguration
-				configFile = func(dir, file string) (*string, error) {
-					filename := "unittestconfig.yaml"
-					return &filename, nil
-				}
 			},
 			validate: func(t *testing.T, c Configuration, err error) {
 				require.Nil(t, c)
@@ -182,6 +178,7 @@ func TestNewConfiguration(t *testing.T) {
 			},
 		},
 	}
+	ConfigFileLocation(".", "unittestconfig.yaml")
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.prepare != nil {
@@ -378,7 +375,7 @@ func TestSetConfiguration_Update(t *testing.T) {
 	})
 
 	t.Run("SetExistingGenericCredentials", func(t *testing.T) {
-		err := configuration.SetGenericCredential(GenericCredential{
+		err := configuration.SetGenericCredentials(GenericCredential{
 			Key:   generic01,
 			Value: "newGenericValue",
 		})

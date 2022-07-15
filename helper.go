@@ -40,17 +40,14 @@ func defaultSaveConfiguration(config *Config) error {
 	}
 
 	encoder := yaml.NewEncoder(file)
-	encoder.SetIndent(4)
+	encoder.SetIndent(2)
 	if err := encoder.Encode(config); err != nil {
 		log.Fatal(err)
 	}
 	return nil
 }
 
-// by default it's ~/.toolsconfig/config.yaml
-var configFile = defaultConfigFileName
-
-func defaultConfigFileName(dir, file string) (*string, error) {
+func configFileName(dir, file string) (*string, error) {
 	var filePath string
 	if path.IsAbs(dir) {
 		filePath = path.Join(dir, file)

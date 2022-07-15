@@ -8,8 +8,6 @@ import (
 
 const (
 	ConfigFormat          = "yaml"
-	ConfigDirectory       = ".toolsconfig"
-	ConfigFilename        = "config.yaml"
 	ConfigFilePermissions = 0600
 )
 
@@ -18,21 +16,40 @@ type Configuration interface {
 	SetAzureSubscriptionCredentials(entry AzureSubscriptionCredential) error
 	// GetAzureSubscriptionCredentials get the azure subscription credentials.
 	GetAzureSubscriptionCredentials(nameOrID string) (*AzureSubscriptionCredential, error)
+	// SetServerCredentials set the server credentials.
 	SetServerCredentials(entry ServerCredential) error
-	SetGenericCredential(entry GenericCredential) error
+	// GetServerCredentials get the server credentials.
 	GetServerCredentials(url string) (*ServerCredential, error)
+	// SetGenericCredentials set the generic credentials.
+	SetGenericCredentials(entry GenericCredential) error
+	// GetGenericCredentials set the generic credentials.
 	GetGenericCredentials(key string) (*GenericCredential, error)
+	// GetGeneric ...
 	GetGeneric(key string) string
+	// SetDefaultSubscription set the default azure subscription.
 	SetDefaultSubscription(subscriptionName string) error
+	// SaveFavourite saves a favourite in the config file.
 	SaveFavourite(tool, name string, args []string) error
+	// GetFavourite get a favourite entry identified by the toolname and it's name.
 	GetFavourite(tool, name string) (*Favourite, error)
+	// GetFavourites get all favourites for a given tool.
 	GetFavourites(tool string) []Favourite
+	// RemoveFavourite remove a favourite from the config file.
 	RemoveFavourite(tool, name string) error
 }
 
+var (
+	configDirectory *string = nil
+	configFile      *string = nil
+)
+
+func ConfigFileLocation(dir, filename string) {
+	configDirectory = &dir
+	configFile = &filename
+}
+
 // NewToolConfiguration creates a new configuration object.
-// If the option WithConfigDir and WithConfigFile are not provided,
-// the configuration is loaded from the default location (~/.toolsconfig/config/yaml).
+// You have to set the config file location before calling this function by calling `toolconfig.ConfigFileLocation("dir", "filename")`.
 // Use the options
 // * RequiredServer(..)
 // * RequiredAzureSubscription(..)
@@ -40,10 +57,13 @@ type Configuration interface {
 // to specify which credentials are required. If the credentials are not available in the configuration,
 // an error is returned immediately.
 func NewToolConfiguration(options ...ConfigOption) (Configuration, error) {
+	if configDirectory == nil || configFile == nil {
+		panic(`Configuration file location not set. Call toolconfig.ConfigFileLocation("dir", "filename")`)
+	}
 	opts := ConfigOptions{
 		updateConfig:    true,
-		configDirectory: ConfigDirectory,
-		configFile:      ConfigFilename,
+		configDirectory: *configDirectory,
+		configFile:      *configFile,
 	}
 	for _, option := range options {
 		option(&opts)
@@ -55,7 +75,7 @@ func NewToolConfiguration(options ...ConfigOption) (Configuration, error) {
 		generics:           map[string]*GenericCredential{},
 	}
 
-	file, err := configFile(opts.configDirectory, opts.configFile)
+	file, err := configFileName(opts.configDirectory, opts.configFile)
 	if err != nil {
 		return nil, wrapErr(err)
 	}
@@ -135,7 +155,7 @@ func (c *ToolConfiguration) SetServerCredentials(entry ServerCredential) error {
 	return saveConfiguration(c.config)
 }
 
-func (c *ToolConfiguration) SetGenericCredential(entry GenericCredential) error {
+func (c *ToolConfiguration) SetGenericCredentials(entry GenericCredential) error {
 	if entry.Key == "" {
 		return fmt.Errorf("generic credential key missing")
 	}
