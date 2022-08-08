@@ -45,7 +45,7 @@ type GenericCredential struct {
 
 type Favourite struct {
 	Name string   `yaml:"name"`
-	Args []string `yaml:"args"`
+	Args []string `yaml:"args,flow"`
 }
 
 func (s Favourite) String() string {

@@ -1,0 +1,17 @@
+servers:
+  - url: testserver.io
+    username: testusername
+    password: testpassword
+  - url: new-server
+    username: ""
+    password: ""
+azureSubscriptions:
+  - name: testSubscription01
+    subscriptionID: subscription-id
+    tenantID: tenant-id
+    clientID: client-id
+    clientSecret: client-secret
+generics:
+  - key: generic
+    value: ""
+favourites: {}

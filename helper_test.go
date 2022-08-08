@@ -52,7 +52,7 @@ func Test_defaultConfigFileName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := defaultConfigFileName(tt.args.dir, tt.args.file)
+			got, err := configFileName(tt.args.dir, tt.args.file)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("defaultConfigFileName() error = %v, wantErr %v", err, tt.wantErr)
 				return

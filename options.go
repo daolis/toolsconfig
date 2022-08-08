@@ -64,17 +64,3 @@ func UpdateConfig(value bool) ConfigOption {
 		c.updateConfig = value
 	}
 }
-
-// WithConfigDir sets the configuration directory starting from home dir used to save the configuration. Default: .mamba
-func WithConfigDir(directory string) ConfigOption {
-	return func(c *ConfigOptions) {
-		c.configDirectory = directory
-	}
-}
-
-// WithConfigFile sets the configuration file nameto save the configuration. Default: mamba.yaml
-func WithConfigFile(fileName string) ConfigOption {
-	return func(c *ConfigOptions) {
-		c.configFile = fileName
-	}
-}

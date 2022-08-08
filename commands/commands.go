@@ -29,7 +29,7 @@ var favListCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	Short:   "List favourites",
 	Run: func(cmd *cobra.Command, args []string) {
-		cobra.CheckErr(ListFavourites(cmd.Root().Name()))
+		cobra.CheckErr(listFavourites(cmd.Root().Name()))
 	},
 }
 
@@ -74,7 +74,7 @@ func AddToRootCommand(command *cobra.Command, opts ...commandOption) {
 				}
 				saveArgs = append(saveArgs, arg)
 			}
-			cobra.CheckErr(SaveFavourite(cmd.Root().Name(), rootArgs.saveName, saveArgs))
+			cobra.CheckErr(saveFavourite(cmd.Root().Name(), rootArgs.saveName, saveArgs))
 			log.WithField("name", rootArgs.saveName).Info("Saved command as favourite")
 			return
 		}
@@ -100,7 +100,7 @@ func AddToRootCommand(command *cobra.Command, opts ...commandOption) {
 	}
 
 	command.PersistentFlags().StringVar(&rootArgs.saveName, "save", "", "Save the command with the given name!")
-	command.Flags().StringVar(&rootArgs.runFavouriteName, "run", "", "DryRunnable the saved favourite with the given name")
+	command.Flags().StringVar(&rootArgs.runFavouriteName, "run", "", "Run the saved favourite with the given name")
 	command.AddCommand(favCmd)
 	command.PersistentPostRun = persistentPostRun
 	command.Run = rootRun
