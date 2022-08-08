@@ -101,6 +101,19 @@ func AddToRootCommand(command *cobra.Command, opts ...commandOption) {
 
 	command.PersistentFlags().StringVar(&rootArgs.saveName, "save", "", "Save the command with the given name!")
 	command.Flags().StringVar(&rootArgs.runFavouriteName, "run", "", "Run the saved favourite with the given name")
+	_ = command.RegisterFlagCompletionFunc("run", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		cfg, err := newToolsConfig()
+		if err != nil {
+			panic(err)
+		}
+		favourites := cfg.GetFavourites(cmd.Root().Name())
+		favNames := make([]string, len(favourites))
+		for idx, favourite := range favourites {
+			favNames[idx] = favourite.Name
+		}
+		return favNames, cobra.ShellCompDirectiveDefault
+	})
+
 	command.AddCommand(favCmd)
 	command.PersistentPostRun = persistentPostRun
 	command.Run = rootRun

@@ -16,6 +16,8 @@ type Configuration interface {
 	SetAzureSubscriptionCredentials(entry AzureSubscriptionCredential) error
 	// GetAzureSubscriptionCredentials get the azure subscription credentials.
 	GetAzureSubscriptionCredentials(nameOrID string) (*AzureSubscriptionCredential, error)
+	// GetAllAzureSubscriptionCredentials returns all azure subscription credentials availabel in config file.
+	GetAllAzureSubscriptionCredentials() []AzureSubscriptionCredential
 	// SetServerCredentials set the server credentials.
 	SetServerCredentials(entry ServerCredential) error
 	// GetServerCredentials get the server credentials.
@@ -203,6 +205,10 @@ func (c *ToolConfiguration) GetAzureSubscriptionCredentials(nameOrID string) (*A
 	}
 	c.azureSubscriptions[searchNameOrId] = credential
 	return credential, nil
+}
+
+func (c *ToolConfiguration) GetAllAzureSubscriptionCredentials() []AzureSubscriptionCredential {
+	return c.config.AzureSubscriptions
 }
 
 // GetGenericCredentials find the credentials for the given key. Returns errNotFound if not found.

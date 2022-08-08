@@ -63,10 +63,7 @@ favourites:
   toolname1:
     favName:
       name: favName
-      args:
-        - arg01
-        - arg02
-        - arg03
+      args: [ arg01, arg02, arg03]
 ```
 
 ### Environement Variables
