@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var _ Configuration = new(ToolConfiguration)
+var _ Configuration = &ToolConfiguration{}
 
 type ToolConfiguration struct {
 	config             *Config

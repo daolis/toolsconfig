@@ -16,16 +16,20 @@ type Configuration interface {
 	SetAzureSubscriptionCredentials(entry AzureSubscriptionCredential) error
 	// GetAzureSubscriptionCredentials get the azure subscription credentials.
 	GetAzureSubscriptionCredentials(nameOrID string) (*AzureSubscriptionCredential, error)
-	// GetAllAzureSubscriptionCredentials returns all azure subscription credentials availabel in config file.
+	// GetAllAzureSubscriptionCredentials returns all azure subscription credentials available in config file.
 	GetAllAzureSubscriptionCredentials() []AzureSubscriptionCredential
 	// SetServerCredentials set the server credentials.
 	SetServerCredentials(entry ServerCredential) error
 	// GetServerCredentials get the server credentials.
 	GetServerCredentials(url string) (*ServerCredential, error)
+	// GetAllServerCredentials returns all generic credentials available in config file.
+	GetAllServerCredentials() []ServerCredential
 	// SetGenericCredentials set the generic credentials.
 	SetGenericCredentials(entry GenericCredential) error
 	// GetGenericCredentials set the generic credentials.
 	GetGenericCredentials(key string) (*GenericCredential, error)
+	// GetAllGenericCredentials returns all generic credentials available in config file.
+	GetAllGenericCredentials() []GenericCredential
 	// GetGeneric ...
 	GetGeneric(key string) string
 	// SetDefaultSubscription set the default azure subscription.
@@ -58,9 +62,9 @@ func ConfigFileLocation(dir, filename string) {
 // * RequiredGeneric(..)
 // to specify which credentials are required. If the credentials are not available in the configuration,
 // an error is returned immediately.
-func NewToolConfiguration(options ...ConfigOption) (Configuration, error) {
+var NewToolConfiguration = func(options ...ConfigOption) (Configuration, error) {
 	if configDirectory == nil || configFile == nil {
-		panic(`Configuration file location not set. Call toolconfig.ConfigFileLocation("dir", "filename")`)
+		return nil, fmt.Errorf(`configuration file location not set (Call toolconfig.ConfigFileLocation("dir", "filename"))`)
 	}
 	opts := ConfigOptions{
 		updateConfig:    true,
@@ -187,6 +191,10 @@ func (c *ToolConfiguration) GetServerCredentials(url string) (*ServerCredential,
 	return credential, nil
 }
 
+func (c *ToolConfiguration) GetAllServerCredentials() []ServerCredential {
+	return c.config.Servers
+}
+
 // GetAzureSubscriptionCredentials find the credentials for the given name or subscription id. Returns errNotFound if not found.
 func (c *ToolConfiguration) GetAzureSubscriptionCredentials(nameOrID string) (*AzureSubscriptionCredential, error) {
 	if fromEnv := (AzureSubscriptionCredential{}.FromEnv(nameOrID)); fromEnv != nil {
@@ -225,6 +233,10 @@ func (c *ToolConfiguration) GetGenericCredentials(key string) (*GenericCredentia
 	}
 	c.generics[key] = credential
 	return credential, nil
+}
+
+func (c *ToolConfiguration) GetAllGenericCredentials() []GenericCredential {
+	return c.config.Generic
 }
 
 // GetGeneric is a simple call to get only the value of a generic key. Empty string if not exists.

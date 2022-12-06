@@ -22,6 +22,9 @@ var favCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cobra.CheckErr(cmd.Help())
 	},
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		// do not call PersistentPreRun from parent
+	},
 }
 
 var favListCmd = &cobra.Command{
@@ -30,6 +33,9 @@ var favListCmd = &cobra.Command{
 	Short:   "List favourites",
 	Run: func(cmd *cobra.Command, args []string) {
 		cobra.CheckErr(listFavourites(cmd.Root().Name()))
+	},
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		// do not call PersistentPreRun from parent
 	},
 }
 
