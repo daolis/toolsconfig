@@ -2,6 +2,7 @@ package toolsconfig
 
 import (
 	"errors"
+	"path/filepath"
 	"strings"
 )
 
@@ -15,7 +16,18 @@ func (e ConfigError) Error() string {
 	if len(e.Missing) > 0 {
 		missing = " [" + strings.Join(e.Missing, ", ") + "]"
 	}
-	return "ConfigurationError: " + e.Err.Error() + missing + " - check config file"
+	var configFilePath string
+	if configDirectory != nil && configFile != nil {
+		name, err := configFileName(*configDirectory, *configFile)
+		if err == nil {
+			absConfigFilePath, err := filepath.Abs(*name)
+			if err != nil {
+				panic(err)
+			}
+			configFilePath = absConfigFilePath
+		}
+	}
+	return "ConfigurationError: " + e.Err.Error() + missing + " - check config file '" + configFilePath + "'"
 }
 
 func wrapErr(err error, missing ...string) *ConfigError {

@@ -3,6 +3,7 @@ package toolsconfig
 import (
 	"errors"
 	"os"
+	"path"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -44,12 +45,18 @@ func TestNewConfiguration(t *testing.T) {
 				}
 			},
 			validate: func(t *testing.T, c Configuration, err error) {
-				require.Nil(t, c)
-				require.NotNil(t, err)
+				r := require.New(t)
+				r.Nil(c)
+				r.NotNil(err)
 				var configError *ConfigError
 				errors.As(err, &configError)
-				require.Error(t, err, "missing values")
-				require.Equal(t, len(configError.Missing), 4)
+				errorMessage := err.Error()
+				r.Error(err, "missing values")
+				r.Equal(len(configError.Missing), 4)
+				workDir, err := os.Getwd()
+				r.Nil(err)
+				absPath := path.Join(workDir, "unittestconfig.yaml")
+				r.Equal("ConfigurationError: missing entries [Server: testserver.io, Server: ser.test02.com, AzureSubscriptionCredential: testSubscription01, GenericCredential: generic] - check config file '"+absPath+"'", errorMessage)
 			},
 		},
 		{
@@ -79,25 +86,25 @@ func TestNewConfiguration(t *testing.T) {
 				}
 			},
 			validate: func(t *testing.T, c Configuration, err error) {
-				require.Nil(t, err)
-				require.NotNil(t, c)
+				r := require.New(t)
+				r.Nil(err)
+				r.NotNil(c)
 				serverCred, err := c.GetServerCredentials(serverURL01)
-				require.Nil(t, err)
-				require.Equal(t, "testusername", serverCred.Username)
-				require.Equal(t, "testpassword", serverCred.Password)
+				r.Nil(err)
+				r.Equal("testusername", serverCred.Username)
+				r.Equal("testpassword", serverCred.Password)
 				subscriptionCred, err := c.GetAzureSubscriptionCredentials(subscriptionName01)
-				require.Nil(t, err)
-				require.Equal(t, "subscription-id", subscriptionCred.SubscriptionID)
-				require.Equal(t, "tenant-id", subscriptionCred.TenantID)
-				require.Equal(t, "client-id", subscriptionCred.ClientID)
-				require.Equal(t, "client-secret", subscriptionCred.ClientSecret)
+				r.Nil(err)
+				r.Equal("subscription-id", subscriptionCred.SubscriptionID)
+				r.Equal("tenant-id", subscriptionCred.TenantID)
+				r.Equal("client-id", subscriptionCred.ClientID)
+				r.Equal("client-secret", subscriptionCred.ClientSecret)
 				subscriptionCred, err = c.GetAzureSubscriptionCredentials("subscription-id")
-				require.Nil(t, err)
-				require.Equal(t, subscriptionName01, subscriptionCred.Name)
+				r.Nil(err)
+				r.Equal(subscriptionName01, subscriptionCred.Name)
 				genericCred := c.GetGeneric(generic01)
-				require.Equal(t, "genericValue", genericCred)
-
-				require.Nil(t, savedConfig)
+				r.Equal("genericValue", genericCred)
+				r.Nil(savedConfig)
 			},
 		},
 		{
@@ -125,17 +132,17 @@ func TestNewConfiguration(t *testing.T) {
 				}
 			},
 			validate: func(t *testing.T, c Configuration, err error) {
-				require.Nil(t, c)
-				require.NotNil(t, err)
+				r := require.New(t)
+				r.Nil(c)
+				r.NotNil(err)
 				var configError *ConfigError
 				errors.As(err, &configError)
-				require.Error(t, err, "missing values")
-				require.Equal(t, len(configError.Missing), 2)
-
-				require.NotNil(t, savedConfig)
-				require.Equal(t, 2, len(savedConfig.Servers))
-				require.Equal(t, 1, len(savedConfig.AzureSubscriptions))
-				require.Equal(t, 1, len(savedConfig.Generic))
+				r.Error(err, "missing values")
+				r.Equal(len(configError.Missing), 2)
+				r.NotNil(savedConfig)
+				r.Equal(2, len(savedConfig.Servers))
+				r.Equal(1, len(savedConfig.AzureSubscriptions))
+				r.Equal(1, len(savedConfig.Generic))
 			},
 		},
 		{
@@ -160,18 +167,19 @@ func TestNewConfiguration(t *testing.T) {
 				saveConfiguration = defaultSaveConfiguration
 			},
 			validate: func(t *testing.T, c Configuration, err error) {
-				require.Nil(t, c)
-				require.NotNil(t, err)
+				r := require.New(t)
+				r.Nil(c)
+				r.NotNil(err)
 				var configError *ConfigError
 				errors.As(err, &configError)
-				require.Error(t, err, "missing values")
-				require.Equal(t, len(configError.Missing), 2)
+				r.Error(err, "missing values")
+				r.Equal(len(configError.Missing), 2)
 
 				savedConfig := defaultReadConfiguration()
-				require.NotNil(t, savedConfig)
-				require.Equal(t, 2, len(savedConfig.Servers))
-				require.Equal(t, 1, len(savedConfig.AzureSubscriptions))
-				require.Equal(t, 1, len(savedConfig.Generic))
+				r.NotNil(savedConfig)
+				r.Equal(2, len(savedConfig.Servers))
+				r.Equal(1, len(savedConfig.AzureSubscriptions))
+				r.Equal(1, len(savedConfig.Generic))
 			},
 			cleanup: func() {
 				//_ = os.Remove("unittestconfig.yaml")
