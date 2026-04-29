@@ -85,6 +85,12 @@ var NewToolConfiguration = func(options ...ConfigOption) (Configuration, error) 
 	if err != nil {
 		return nil, wrapErr(err)
 	}
+
+	err = checkConfigFilePermissions(file)
+	if err != nil {
+		return nil, err
+	}
+
 	viper.SetConfigType(ConfigFormat)
 	viper.SetConfigFile(*file)
 	viper.SetConfigPermissions(ConfigFilePermissions)

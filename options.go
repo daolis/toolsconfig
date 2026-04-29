@@ -6,9 +6,9 @@ type ConfigOptions struct {
 	requiredServers            []string
 	requiredAzureSubscriptions []string
 	requiredGenerics           []string
-	updateConfig               bool
 	configDirectory            string
 	configFile                 string
+	updateConfig               bool
 }
 
 func (c ConfigOptions) requiredConfig() *Config {

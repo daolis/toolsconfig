@@ -34,7 +34,7 @@ func defaultSaveConfiguration(config *Config) error {
 		os.Mkdir(dir, 0700)
 	}
 
-	file, err := os.Create(viper.ConfigFileUsed())
+	file, err := os.OpenFile(viper.ConfigFileUsed(), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
