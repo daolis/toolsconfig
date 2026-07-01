@@ -2,6 +2,8 @@ package toolsconfig
 
 import (
 	"fmt"
+	"slices"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -301,6 +303,9 @@ func (c *ToolConfiguration) GetFavourites(tool string) []Favourite {
 			result[idx] = favourite
 			idx++
 		}
+		slices.SortFunc(result, func(a, b Favourite) int {
+			return strings.Compare(a.Name, b.Name)
+		})
 		return result
 	}
 	return []Favourite{}
