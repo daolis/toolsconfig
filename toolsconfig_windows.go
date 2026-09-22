@@ -4,6 +4,6 @@
 //
 package toolsconfig
 
-func checkConfigFilePermissions(file *string) error {
+func defaultCheckConfigFilePermissions(file *string) error {
 	return nil
 }

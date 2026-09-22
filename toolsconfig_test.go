@@ -21,6 +21,13 @@ func TestNewConfiguration(t *testing.T) {
 	type args struct {
 		options []ConfigOption
 	}
+	checkConfigFilePermissions = func(file *string) error {
+		return nil
+	}
+	defer func() {
+		checkConfigFilePermissions = defaultCheckConfigFilePermissions
+	}()
+
 	tests := []struct {
 		name     string
 		args     args
@@ -37,8 +44,8 @@ func TestNewConfiguration(t *testing.T) {
 				RequiredGeneric(generic01),
 			}},
 			prepare: func() {
-				readConfiguration = func() *Config {
-					return &Config{}
+				readConfiguration = func() (*Config, error) {
+					return &Config{}, nil
 				}
 				saveConfiguration = func(config *Config) error {
 					return nil
@@ -67,7 +74,7 @@ func TestNewConfiguration(t *testing.T) {
 				RequiredGeneric(generic01),
 			}},
 			prepare: func() {
-				readConfiguration = func() *Config {
+				readConfiguration = func() (*Config, error) {
 					return &Config{
 						Servers: []ServerCredential{
 							{URL: serverURL01, Username: "testusername", Password: "testpassword"},
@@ -78,7 +85,7 @@ func TestNewConfiguration(t *testing.T) {
 						Generic: []GenericCredential{
 							{Key: generic01, Value: "genericValue"},
 						},
-					}
+					}, nil
 				}
 				saveConfiguration = func(config *Config) error {
 					savedConfig = config
@@ -116,7 +123,7 @@ func TestNewConfiguration(t *testing.T) {
 				RequiredGeneric(generic01),
 			}},
 			prepare: func() {
-				readConfiguration = func() *Config {
+				readConfiguration = func() (*Config, error) {
 					return &Config{
 						Servers: []ServerCredential{
 							{URL: serverURL01, Username: "testusername", Password: "testpassword"},
@@ -124,7 +131,7 @@ func TestNewConfiguration(t *testing.T) {
 						AzureSubscriptions: []AzureSubscriptionCredential{
 							{Name: subscriptionName01, SubscriptionID: "subscription-id", TenantID: "tenant-id", ClientID: "client-id", ClientSecret: "client-secret"},
 						},
-					}
+					}, nil
 				}
 				saveConfiguration = func(config *Config) error {
 					savedConfig = config
@@ -154,7 +161,7 @@ func TestNewConfiguration(t *testing.T) {
 				RequiredGeneric(generic01),
 			}},
 			prepare: func() {
-				readConfiguration = func() *Config {
+				readConfiguration = func() (*Config, error) {
 					return &Config{
 						Servers: []ServerCredential{
 							{URL: serverURL01, Username: "testusername", Password: "testpassword"},
@@ -162,7 +169,7 @@ func TestNewConfiguration(t *testing.T) {
 						AzureSubscriptions: []AzureSubscriptionCredential{
 							{Name: subscriptionName01, SubscriptionID: "subscription-id", TenantID: "tenant-id", ClientID: "client-id", ClientSecret: "client-secret"},
 						},
-					}
+					}, nil
 				}
 				saveConfiguration = defaultSaveConfiguration
 			},
@@ -175,7 +182,8 @@ func TestNewConfiguration(t *testing.T) {
 				r.Error(err, "missing values")
 				r.Equal(len(configError.Missing), 2)
 
-				savedConfig := defaultReadConfiguration()
+				savedConfig, err := defaultReadConfiguration()
+				r.NoError(err)
 				r.NotNil(savedConfig)
 				r.Equal(2, len(savedConfig.Servers))
 				r.Equal(1, len(savedConfig.AzureSubscriptions))
@@ -203,13 +211,17 @@ func TestNewConfiguration(t *testing.T) {
 
 func TestGettingConfigurationEnvOnly(t *testing.T) {
 	var saveCalled bool
-	readConfiguration = func() *Config {
-		return &Config{}
+	readConfiguration = func() (*Config, error) {
+		return &Config{}, nil
 	}
 	saveConfiguration = func(config *Config) error {
 		saveCalled = true
 		return nil
 	}
+	checkConfigFilePermissions = func(file *string) error {
+		return nil
+	}
+	defer func() { checkConfigFilePermissions = nil }()
 	require.NoError(t, os.Setenv(toEnvironmentKey(serverURL01, "username"), "envUsername"))
 	require.NoError(t, os.Setenv(toEnvironmentKey(serverURL01, "password"), "envPassword"))
 
@@ -239,13 +251,17 @@ func TestGettingConfiguration(t *testing.T) {
 		},
 	}
 
-	readConfiguration = func() *Config {
-		return savedConfig
+	readConfiguration = func() (*Config, error) {
+		return savedConfig, nil
 	}
 	saveConfiguration = func(config *Config) error {
 		savedConfig = config
 		return nil
 	}
+	checkConfigFilePermissions = func(file *string) error {
+		return nil
+	}
+	defer func() { checkConfigFilePermissions = nil }()
 
 	configuration, err := NewToolConfiguration()
 	t.Run("GetServerConfig", func(t *testing.T) {
@@ -338,13 +354,17 @@ func TestSetConfiguration_Update(t *testing.T) {
 		},
 	}
 
-	readConfiguration = func() *Config {
-		return savedConfig
+	readConfiguration = func() (*Config, error) {
+		return savedConfig, nil
 	}
 	saveConfiguration = func(config *Config) error {
 		savedConfig = config
 		return nil
 	}
+	checkConfigFilePermissions = func(file *string) error {
+		return nil
+	}
+	defer func() { checkConfigFilePermissions = nil }()
 
 	configuration, err := NewToolConfiguration()
 	t.Run("SetExistingSubscriptionCredentials", func(t *testing.T) {
@@ -413,13 +433,17 @@ func TestFavourites(t *testing.T) {
 		DefaultAzureSubscription: "",
 	}
 
-	readConfiguration = func() *Config {
-		return savedConfig
+	readConfiguration = func() (*Config, error) {
+		return savedConfig, nil
 	}
 	saveConfiguration = func(config *Config) error {
 		savedConfig = config
 		return nil
 	}
+	checkConfigFilePermissions = func(file *string) error {
+		return nil
+	}
+	defer func() { checkConfigFilePermissions = nil }()
 
 	configuration, err := NewToolConfiguration()
 	const toolName = "testtool"

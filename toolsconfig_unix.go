@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func checkConfigFilePermissions(file *string) error {
+func defaultCheckConfigFilePermissions(file *string) error {
 	if file == nil {
 		return fmt.Errorf("config file is required")
 	}
@@ -19,7 +19,7 @@ func checkConfigFilePermissions(file *string) error {
 	}
 	permissions := info.Mode().Perm()
 	if permissions != 0o600 {
-		return fmt.Errorf("incorrect permissions %s (0%o), must be 0600 for '%s'", permissions, permissions, *file)
+		return wrapErr(fmt.Errorf("incorrect permissions %s (0%o), must be 0600 for '%s'", permissions, permissions, *file))
 	}
 	return nil
 }

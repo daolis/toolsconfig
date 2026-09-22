@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+var checkConfigFilePermissions = defaultCheckConfigFilePermissions;
+
 const (
 	ConfigFormat          = "yaml"
 	ConfigFilePermissions = 0600
@@ -97,7 +99,10 @@ var NewToolConfiguration = func(options ...ConfigOption) (Configuration, error) 
 	viper.SetConfigFile(*file)
 	viper.SetConfigPermissions(ConfigFilePermissions)
 
-	c.config = readConfiguration()
+	c.config, err = readConfiguration()
+	if err != nil {
+		return nil, wrapErr(err)
+	}
 	err = verifyRequiredValues(c, opts)
 	if err != nil {
 		dirty := c.config.merge(opts.requiredConfig())

@@ -1,6 +1,7 @@
 package toolsconfig
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path"
@@ -12,18 +13,19 @@ import (
 
 var readConfiguration = defaultReadConfiguration
 
-func defaultReadConfiguration() *Config {
+
+func defaultReadConfiguration() (*Config, error) {
 	var config Config
 	filename := viper.ConfigFileUsed()
 	file, err := os.Open(filename)
 	if err != nil {
-		return &Config{}
+		return &Config{}, nil
 	}
 	decoder := yaml.NewDecoder(file)
 	if err := decoder.Decode(&config); err != nil {
-		log.Fatal(err)
+		return &Config{}, fmt.Errorf("error parsing config file '%s': %w", filename, err)
 	}
-	return &config
+	return &config, nil
 }
 
 var saveConfiguration = defaultSaveConfiguration
